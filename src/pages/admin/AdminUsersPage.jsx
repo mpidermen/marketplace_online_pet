@@ -14,7 +14,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { is_active: true };
       if (search) params.search = search;
       if (roleFilter !== "Semua") params.role = roleFilter;
       const res = await adminService.getUsers(params);
