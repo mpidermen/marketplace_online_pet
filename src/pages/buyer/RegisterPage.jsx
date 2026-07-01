@@ -18,16 +18,21 @@ export default function RegisterPage() {
     if (form.password.length < 6) { toast.error("Password minimal 6 karakter!"); return; }
     setLoading(true);
     try {
-      const user = await register({
+      const result = await register({
         name: form.name,
         email: form.email,
         phone: form.phone,
         password: form.password,
         role: form.role,
       });
-      toast.success(`Akun berhasil dibuat! Selamat datang, ${user.name}! 🎉`);
-      if (form.role === "seller") navigate("/seller/dashboard");
-      else navigate("/");
+      if (result.pending) {
+        toast.success("Registrasi berhasil! Akun seller Anda menunggu persetujuan admin. Silakan login setelah disetujui. 🎉");
+        navigate("/login");
+      } else {
+        toast.success(`Akun berhasil dibuat! Selamat datang, ${result.name}! 🎉`);
+        if (form.role === "seller") navigate("/seller/dashboard");
+        else navigate("/");
+      }
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Registrasi gagal";
       toast.error(msg);
@@ -66,6 +71,12 @@ export default function RegisterPage() {
                 </button>
               ))}
             </div>
+
+            {form.role === "seller" && (
+              <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-xl px-4 py-3">
+                ℹ️ Akun penjual perlu disetujui admin terlebih dahulu sebelum bisa login dan mulai berjualan.
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

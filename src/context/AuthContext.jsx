@@ -56,6 +56,10 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     const res = await api.post("/auth/register", data);
     const { user: userData, token } = res.data;
+    if (!token) {
+      // Seller baru, masih menunggu persetujuan admin — jangan auto-login
+      return { pending: true, user: userData };
+    }
     const fullUser = { ...userData, token };
     setUser(fullUser);
     localStorage.setItem("petopia_user", JSON.stringify(fullUser));
