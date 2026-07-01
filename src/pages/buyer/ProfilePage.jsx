@@ -18,6 +18,10 @@ export default function ProfilePage() {
     postal_code: user?.postal_code || "",
   });
 
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwForm, setPwForm] = useState({ password: "", new_password: "", confirm_password: "" });
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -30,6 +34,33 @@ export default function ProfilePage() {
       toast.error(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!pwForm.password || !pwForm.new_password || !pwForm.confirm_password) {
+      toast.error("Semua kolom password wajib diisi.");
+      return;
+    }
+    if (pwForm.new_password.length < 6) {
+      toast.error("Password baru minimal 6 karakter.");
+      return;
+    }
+    if (pwForm.new_password !== pwForm.confirm_password) {
+      toast.error("Konfirmasi password baru tidak cocok.");
+      return;
+    }
+    setPwLoading(true);
+    try {
+      await userService.updateProfile({ password: pwForm.password, new_password: pwForm.new_password });
+      toast.success("Password berhasil diubah!");
+      setPwForm({ password: "", new_password: "", confirm_password: "" });
+      setChangingPassword(false);
+    } catch (err) {
+      const msg = err.response?.data?.message || "Gagal mengubah password.";
+      toast.error(msg);
+    } finally {
+      setPwLoading(false);
     }
   };
 
@@ -150,9 +181,75 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4">
-        <p className="text-sm text-amber-700 font-medium">🔒 Keamanan Akun</p>
-        <p className="text-xs text-amber-600 mt-1">Untuk mengubah password, silakan hubungi support kami.</p>
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-gray-800">🔒 Keamanan Akun</p>
+            <p className="text-xs text-gray-400 mt-0.5">Ubah password akun kamu di sini.</p>
+          </div>
+          {!changingPassword && (
+            <button
+              onClick={() => setChangingPassword(true)}
+              className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-emerald-400 transition-colors"
+            >
+              Ubah Password
+            </button>
+          )}
+        </div>
+
+        {changingPassword && (
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Password Lama</label>
+              <input
+                type="password"
+                value={pwForm.password}
+                onChange={e => setPwForm(p => ({ ...p, password: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 focus:outline-none text-sm"
+                placeholder="Masukkan password lama"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Password Baru</label>
+              <input
+                type="password"
+                value={pwForm.new_password}
+                onChange={e => setPwForm(p => ({ ...p, new_password: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 focus:outline-none text-sm"
+                placeholder="Minimal 6 karakter"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Konfirmasi Password Baru</label>
+              <input
+                type="password"
+                value={pwForm.confirm_password}
+                onChange={e => setPwForm(p => ({ ...p, confirm_password: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 focus:outline-none text-sm"
+                placeholder="Ulangi password baru"
+              />
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleChangePassword}
+                disabled={pwLoading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-emerald-500 text-white hover:bg-emerald-600 transition-colors disabled:opacity-60"
+              >
+                {pwLoading
+                  ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : <><FiCheck /> Simpan Password</>
+                }
+              </button>
+              <button
+                onClick={() => { setChangingPassword(false); setPwForm({ password: "", new_password: "", confirm_password: "" }); }}
+                disabled={pwLoading}
+                className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
