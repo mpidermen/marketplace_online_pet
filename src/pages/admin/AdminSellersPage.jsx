@@ -46,7 +46,7 @@ export default function AdminSellersPage() {
 
   const handleApprove = async (id) => {
     try {
-      await adminService.updateUser(id, { is_active: true });
+      await adminService.updateUser(id, { is_verified: true });
       toast.success("Seller berhasil diverifikasi!");
       fetchData();
     } catch (err) {
@@ -55,7 +55,7 @@ export default function AdminSellersPage() {
   };
   const handleRevoke = async (id) => {
     try {
-      await adminService.updateUser(id, { is_active: false });
+      await adminService.updateUser(id, { is_verified: false });
       toast.success("Verifikasi seller dicabut.");
       fetchData();
     } catch (err) {
@@ -96,8 +96,8 @@ export default function AdminSellersPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-gray-800">{seller.name}</p>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seller.is_active ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"}`}>
-                        {seller.is_active ? "✓ Terverifikasi" : "✗ Belum Verifikasi"}
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seller.is_verified ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-500"}`}>
+                        {seller.is_verified ? "✓ Terverifikasi" : "✗ Belum Verifikasi"}
                       </span>
                     </div>
                     <p className="text-sm text-gray-400 mt-0.5">{seller.email}</p>
@@ -115,7 +115,7 @@ export default function AdminSellersPage() {
                     <p className="text-xs text-gray-400">Produk</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {seller.is_active ? (
+                    {seller.is_verified ? (
                       <button onClick={() => handleRevoke(seller.user_id)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
                         <FiX /> Cabut
                       </button>
